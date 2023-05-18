@@ -47,14 +47,19 @@ async function run() {
       const input = readFileSync(inputPath, "utf-8");
       const extension = path.extname(inputPath);
       const spinner = ora("Generating story...").start();
-      const story = await ComponentConverter(input.replace(/^\s*[\r\n]/gm, "").trim(), process.env.OPENAI_API_KEY)
-        .then((story) => {
-          // reset indentation first
-          story = beautify(story, resetOptions)
-          return beautify(story, options)
-        });
-      writeFileSync(inputPath.replace(extension, `.story${extension}`), story);
-      spinner.stop();
+      try {
+        const story = await ComponentConverter(input.replace(/^\s*[\r\n]/gm, "").trim(), process.env.OPENAI_API_KEY)
+          .then((story) => {
+            // reset indentation first
+            story = beautify(story, resetOptions)
+            return beautify(story, options)
+          });
+        writeFileSync(inputPath.replace(extension, `.story${extension}`), story);
+        spinner.stop();
+      } catch (error) {
+        spinner.stop();
+        console.log(error);
+      }
     });
 }
 
